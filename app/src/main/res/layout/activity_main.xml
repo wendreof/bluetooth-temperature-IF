@@ -1,0 +1,37 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/conectar"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Conectar"/>
+    <Button
+        android:id="@+id/desconectar"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Desconectar"/>
+    <Button
+        android:id="@+id/btnMedirTemperatura"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Medir Temperatura"/>
+    <Button
+        android:id="@+id/btnMedirUmidade"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Medir Umidade"/>
+
+    <EditText
+        android:id="@+id/edtTxtResultadoMedicao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:height="100dp"/>
+</LinearLayout>
