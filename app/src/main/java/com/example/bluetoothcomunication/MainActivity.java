@@ -1,9 +1,11 @@
 package com.example.bluetoothcomunication;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -11,6 +13,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,16 +24,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 	
-	private static final String endereco_MAC_do_Bluetooth_remoto = "00:21:13:00:EE:AE";
+	private static final String endereco_MAC_do_Bluetooth_remoto = "00:13:EF:00:1B:C0";
 	private static final int CODIGO_PARA_ATIVACAO_BLUETOOTH = 1;
 	private static final UUID MEU_UUID = UUID.fromString ( "00001101-0000-1000-8000-00805F9B34FB" );
-	Button conectar;
-	Button desconectar;
+	Switch conectar;
+	Button configuracoes;
 	Button receberDadosTemperatura;
-	Button receberDadosUmidade;
-	EditText medicoesRecebidas;
+	TextView medicoesRecebidas;
 	// representa um dispositivo bluetooth remoto
 	private BluetoothDevice dispositivoBluetoothRemoto;
 	//representa o adaptador Bluetooth do dispositivo local
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 	
 	@Override
 	protected void onCreate ( Bundle savedInstanceState ) {
+
 		super.onCreate ( savedInstanceState );
 		setContentView ( R.layout.activity_main );
 		fazerConexoesDoLayout_e_Listeners ( );
@@ -73,17 +77,16 @@ public class MainActivity extends AppCompatActivity {
 	}
 	
 	public void fazerConexoesDoLayout_e_Listeners ( ) {
-		conectar = ( Button ) findViewById ( R.id.conectar );
-		desconectar = ( Button ) findViewById ( R.id.desconectar );
+		conectar = findViewById ( R.id.conectar );
 		receberDadosTemperatura = ( Button ) findViewById ( R.id.btnMedirTemperatura );
-		receberDadosUmidade = ( Button ) findViewById ( R.id.btnMedirUmidade );
-		medicoesRecebidas = ( EditText ) findViewById ( R.id.edtTxtResultadoMedicao );
+		medicoesRecebidas = findViewById ( R.id.edtTxtResultadoMedicao );
+//		configuracoes.findViewById ( R.id.btnConfiguracao );
 		
 		//eventos associados ao respectivos botões
-		conectar.setOnClickListener ( new Conectar ( ) );
-		desconectar.setOnClickListener ( new Desconectar ( ) );
-		receberDadosTemperatura.setOnClickListener ( new ReceberDados ( ) );
-		receberDadosUmidade.setOnClickListener ( new ReceberDados ( ) );
+		conectar.setOnClickListener ( this );
+		//configuracoes.setOnClickListener ( this );
+		receberDadosTemperatura.setOnClickListener ( this );
+		
 	} // fim do método fazerConexoesDoLayout_e_Listeners
 	
 	public void verificarCondicoesDoBlueTooth ( ) {
@@ -126,150 +129,137 @@ public class MainActivity extends AppCompatActivity {
 		}
 	} // fim do método onActivityResult
 	
-	public class Conectar implements View.OnClickListener {
-		
-		// método sobrescrito da interface View.OnClickListener
-		@Override
-		public void onClick ( View v ) {
-			
-			//Valide um endereço Bluetooth, como "00: 43: A8: 23: 10: F0"
-			// (os caracteres alfabéticos devem estar em maiúsculas para serem válidos)
-			if ( BluetoothAdapter.checkBluetoothAddress ( endereco_MAC_do_Bluetooth_remoto ) ) {
-				// atribui o valor do endereço de MAC para a variável dispositivoBluetoothRemoto
-				dispositivoBluetoothRemoto =
-						meuBluetoothAdapter.getRemoteDevice ( endereco_MAC_do_Bluetooth_remoto );
-			} else {
-				// exibe uma mensagem de erro
-				Toast.makeText (
-						getApplicationContext ( ),
-						"Endereço MAC do dispositivo Bluetooth remoto não é válido",
-						Toast.LENGTH_SHORT ).show ( );
-			}
-			
-			try {
-				// atribui o código UUID a variável bluetoothSocket
-				bluetoothSocket =
-						dispositivoBluetoothRemoto.createInsecureRfcommSocketToServiceRecord ( MEU_UUID );
-				bluetoothSocket.connect ( ); // estabelece a conexão
+	@Override
+	public void onClick ( View view ) {
+		if ( view.getId ( ) == R.id.conectar ) {
+			if ( conectar.isChecked ( ) ) {
+				
 				medicoesRecebidas.setText ( "" );
-				Toast.makeText ( getApplicationContext ( ),
-						"Conectado", Toast.LENGTH_SHORT ).show ( );
-			} catch ( IOException e ) {
-				Log.e ( "ERRO AO CONECTAR", "O erro foi" + e.getMessage ( ) );
-				Toast.makeText ( getApplicationContext ( ),
-						"Conexão não foi estabelecida", Toast.LENGTH_SHORT ).show ( );
-			}
-		}
-	} // fim da classe Conectar
-	
-	public class Desconectar implements View.OnClickListener {
-		
-		// método sobrecarregado da interface View.OnClickListener
-		@Override
-		public void onClick ( View v ) {
-			medicoesRecebidas.setText ( "" );
-			if ( bluetoothSocket != null ) {
-				try {
-					// Fecha imediatamente o soquete e libera todos os recursos associados.
-					bluetoothSocket.close ( ); // encerra a conexão
-					bluetoothSocket = null;
-					// exibe uma mensagem
-					Toast.makeText ( getApplicationContext ( ),
-							"Conexão encerrada", Toast.LENGTH_SHORT ).show ( );
-				} catch ( IOException e ) {
-					Log.e ( "ERRO AO DESCONECTAR", "O erro foi" + e.getMessage ( ) );
+				
+				//Valide um endereço Bluetooth, como "00: 43: A8: 23: 10: F0"
+				// (os caracteres alfabéticos devem estar em maiúsculas para serem válidos)
+				if ( BluetoothAdapter.checkBluetoothAddress ( endereco_MAC_do_Bluetooth_remoto ) ) {
+					// atribui o valor do endereço de MAC para a variável dispositivoBluetoothRemoto
+					dispositivoBluetoothRemoto =
+							meuBluetoothAdapter.getRemoteDevice ( endereco_MAC_do_Bluetooth_remoto );
+				} else {
+					// exibe uma mensagem de erro
 					Toast.makeText (
 							getApplicationContext ( ),
-							"Erro - A conexão permanece estabelecida",
+							"Endereço MAC do dispositivo Bluetooth remoto não é válido",
 							Toast.LENGTH_SHORT ).show ( );
 				}
+				
+				try {
+					// atribui o código UUID a variável bluetoothSocket
+					bluetoothSocket =
+							dispositivoBluetoothRemoto.createInsecureRfcommSocketToServiceRecord ( MEU_UUID );
+					bluetoothSocket.connect ( ); // estabelece a conexão
+					medicoesRecebidas.setText ( "" );
+					Toast.makeText ( getApplicationContext ( ),
+							"Conectado", Toast.LENGTH_SHORT ).show ( );
+				} catch ( IOException e ) {
+					Log.e ( "ERRO AO CONECTAR", "O erro foi" + e.getMessage ( ) );
+					Toast.makeText ( getApplicationContext ( ),
+							"Conexão não foi estabelecida", Toast.LENGTH_SHORT ).show ( );
+				}
 			} else {
-				Toast.makeText (
-						getApplicationContext ( ),
-						"Não há nenhuma conexão estabelecida a ser desconectada",
-						Toast.LENGTH_SHORT ).show ( );
+				medicoesRecebidas.setText ( "" );
+				if ( bluetoothSocket != null ) {
+					try {
+						// Fecha imediatamente o soquete e libera todos os recursos associados.
+						bluetoothSocket.close ( ); // encerra a conexão
+						bluetoothSocket = null;
+						// exibe uma mensagem
+						Toast.makeText ( getApplicationContext ( ),
+								"Conexão encerrada", Toast.LENGTH_SHORT ).show ( );
+					} catch ( IOException e ) {
+						Log.e ( "ERRO AO DESCONECTAR", "O erro foi" + e.getMessage ( ) );
+						Toast.makeText (
+								getApplicationContext ( ),
+								"Erro - A conexão permanece estabelecida",
+								Toast.LENGTH_SHORT ).show ( );
+					}
+				} else {
+					Toast.makeText (
+							getApplicationContext ( ),
+							"Não há nenhuma conexão estabelecida a ser desconectada",
+							Toast.LENGTH_SHORT ).show ( );
+				}
 			}
-		} // fim do onClick
-	} // fim da classe Desconectar
-	
-	
-	public class ReceberDados implements View.OnClickListener {
+		}
 		
-		// método responsável em enviar os dados
-		private void sendData ( String message ) {
-			// atribui um array de bytes à variável msgBuffer
-			byte[] msgBuffer = message.getBytes ( );
+		/*else if ( view.getId ( ) == R.id.btnConfiguracao ) {
+			AlertDialog.Builder alert = new AlertDialog.Builder ( this );
+			alert.setTitle ( "Alterar MAC" );
+			alert.setMessage ( "\nInforme o endereço MAC desejado: " );
 			
-			try {
-				outStream.write ( msgBuffer );
-			} catch ( IOException e ) {
-				Toast.makeText ( getApplicationContext ( ), "Erro - Ao enviar dados",
-						Toast.LENGTH_SHORT ).show ( );
-			}
-		} // fim do metodo sendData
+			final EditText macAddress = new EditText ( this );
+			macAddress.setText ( endereco_MAC_do_Bluetooth_remoto );
+			
+			alert.setView ( macAddress );
+			alert.setPositiveButton ( "Confirmar", new DialogInterface.OnClickListener ( ) {
+				@Override
+				public void onClick ( DialogInterface dialog, int which ) {
+					
+					//endereco_MAC_do_Bluetooth_remoto = macAddress.getText ( ).toString ( );
+					
+				}
+			} );
+			
+			alert.setNegativeButton ( "Cancelar", new DialogInterface.OnClickListener ( ) {
+				@Override
+				public void onClick ( DialogInterface dialog, int which ) {
+				
+				}
+			} );
+			AlertDialog dialog = alert.create ( );
+			dialog.show ( );
+		} */
 		
-		// método sobrescrito da interface OnClickListener
-		// evento do botão
-		@Override
-		public void onClick ( View v ) {
+		else if ( view.getId ( ) == R.id.btnMedirTemperatura ) {
 			// Verifica se há conexão estabelecida com o Bluetooth.
 			if ( bluetoothSocket != null ) {
 				medicoesRecebidas.setText ( "" ); // limpa a caixa de texto
 				// passa o id do botão acionado
-				switch ( v.getId ( ) ) {
-					case R.id.btnMedirTemperatura:
-						try {
-							//Envia Temperatura através do Socket
-							outStream = bluetoothSocket.getOutputStream ( );
-							sendData ( "t" );
-							SystemClock.sleep ( 1000 );
-							// Obtenha o fluxo de entrada associado a este soquete.
-							inputStream = bluetoothSocket.getInputStream ( );
-							
-							// Lê bytes deste fluxo e os armazena num array de bytes
-							byte[] msgBuffer = new byte[ 1024 ];
-							inputStream.read ( msgBuffer );
-							// exibe o valor na caixa de texto
-							Toast.makeText ( getApplicationContext ( ), msgBuffer.toString ( ), Toast.LENGTH_LONG ).show ( );
-							medicoesRecebidas.setText ( new String ( msgBuffer ) );
-							
-						} catch ( IOException e ) {
-							Log.e ( "ERROR", "O erro foi" + e.getMessage ( ) );
-							Toast.makeText ( getApplicationContext ( ),
-									"Mensagem não recebida", Toast.LENGTH_LONG ).show ( );
-						}
-						break;
+				try {
+					//Envia Temperatura através do Socket
+					outStream = bluetoothSocket.getOutputStream ( );
+					//sendData ( "t" );
+					SystemClock.sleep ( 1000 );
+					// Obtenha o fluxo de entrada associado a este soquete.
+					inputStream = bluetoothSocket.getInputStream ( );
 					
-					case R.id.btnMedirUmidade:
-						try {
-							//Envia umidade atravé do Socket
-							outStream = bluetoothSocket.getOutputStream ( );
-							sendData ( "u" );
-							SystemClock.sleep ( 1000 );
-							// Obtenha o fluxo de entrada associado a este soquete.
-							inputStream = bluetoothSocket.getInputStream ( );
-							
-							// Lê bytes deste fluxo e os armazena num array de bytes
-							byte[] msgBuffer = new byte[ 1024 ];
-							inputStream.read ( msgBuffer );
-							
-							medicoesRecebidas.setText ( new String ( msgBuffer ) );
-							
-						} catch ( IOException e ) {
-							Log.e ( "ERROR", "O erro foi" + e.getMessage ( ) );
-							Toast.makeText ( getApplicationContext ( ),
-									"Mensagem não recebida", Toast.LENGTH_LONG ).show ( );
-						}
-						break;
-					default:
-						Toast.makeText ( getApplicationContext ( ),
-								"Botão de medição indisponível", Toast.LENGTH_LONG ).show ( );
-						break;
+					// Lê bytes deste fluxo e os armazena num array de bytes
+					byte[] msgBuffer = new byte[ 1024 ];
+					inputStream.read ( msgBuffer );
+					// exibe o valor na caixa de texto
+					//Toast.makeText ( getApplicationContext ( ), msgBuffer.toString ( ), Toast.LENGTH_LONG ).show ( );
+					
+					String result = new String ( msgBuffer );
+					
+					String result1 = result;
+					result1 += "\n" + result;
+					
+					Toast.makeText ( getApplicationContext ( ), result1, Toast.LENGTH_LONG ).show ( );
+					
+					medicoesRecebidas.setText ( result1 );
+					
+					
+				} catch ( IOException e ) {
+					Log.e ( "ERROR", "O erro foi" + e.getMessage ( ) );
+					Toast.makeText ( getApplicationContext ( ),
+							"Mensagem não recebida", Toast.LENGTH_LONG ).show ( );
 				}
-			} else {
-				Toast.makeText ( getApplicationContext ( ),
-						"Bluetooth não está conectado", Toast.LENGTH_LONG ).show ( );
+				
 			}
-		} // fim do método sobrescrito onClick
-	} // fim da classe ReceberDados
-} // fim da classe MainActivity
+		} else {
+			Toast.makeText ( getApplicationContext ( ),
+					"Bluetooth não está conectado", Toast.LENGTH_LONG ).show ( );
+		}
+		
+	}
+}
+
+
+// fim da classe MainActivity
