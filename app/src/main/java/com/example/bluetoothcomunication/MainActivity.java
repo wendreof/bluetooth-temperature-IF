@@ -13,11 +13,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,13 +29,14 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 	
-	private static final String endereco_MAC_do_Bluetooth_remoto = "00:13:EF:00:1B:C0";
+	String endereco_MAC_do_Bluetooth_remoto = "00:13:EF:00:1B:C0";
 	private static final int CODIGO_PARA_ATIVACAO_BLUETOOTH = 1;
 	private static final UUID MEU_UUID = UUID.fromString ( "00001101-0000-1000-8000-00805F9B34FB" );
 	Switch conectar;
-	Button configuracoes;
+	Button config;
 	Button receberDadosTemperatura;
 	TextView medicoesRecebidas;
+	LinearLayout linearLayout;
 	// representa um dispositivo bluetooth remoto
 	private BluetoothDevice dispositivoBluetoothRemoto;
 	//representa o adaptador Bluetooth do dispositivo local
@@ -78,13 +82,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	
 	public void fazerConexoesDoLayout_e_Listeners ( ) {
 		conectar = findViewById ( R.id.conectar );
-		receberDadosTemperatura = ( Button ) findViewById ( R.id.btnMedirTemperatura );
+		receberDadosTemperatura = findViewById ( R.id.btnMedirTemperatura );
 		medicoesRecebidas = findViewById ( R.id.edtTxtResultadoMedicao );
-//		configuracoes.findViewById ( R.id.btnConfiguracao );
+		config = findViewById ( R.id.btnConfig );
+		linearLayout = findViewById ( R.id.Linear );
 		
 		//eventos associados ao respectivos botões
 		conectar.setOnClickListener ( this );
-		//configuracoes.setOnClickListener ( this );
+		config.setOnClickListener ( this );
 		receberDadosTemperatura.setOnClickListener ( this );
 		
 	} // fim do método fazerConexoesDoLayout_e_Listeners
@@ -96,10 +101,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		
 		// verifica se o celular tem bluetooth
 		if ( meuBluetoothAdapter == null ) {
-			Toast.makeText (
+		/*	Toast.makeText (
 					getApplicationContext ( ),
 					"Dispositivo não possui adaptador Bluetooth",
-					Toast.LENGTH_LONG ).show ( );
+					Toast.LENGTH_LONG ).show ( ); */
+		ShowMSG ( "Dispositivo não possui adaptador Bluetooth" );
 			// finaliza a aplicação
 			finish ( );
 		} else {
@@ -119,11 +125,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		switch ( requestCode ) {
 			case CODIGO_PARA_ATIVACAO_BLUETOOTH:
 				if ( resultCode == Activity.RESULT_OK ) {
-					Toast.makeText ( getApplicationContext ( ), "Bluetooth foi ativado",
-							Toast.LENGTH_LONG ).show ( );
+					/*Toast.makeText ( getApplicationContext ( ), "Bluetooth foi ativado",
+							Toast.LENGTH_LONG ).show ( ); */
+					ShowMSG("Bluetooth foi ativado");
 				} else {
-					Toast.makeText ( getApplicationContext ( ), "Bluetooth não foi ativado",
-							Toast.LENGTH_LONG ).show ( );
+					/*Toast.makeText ( getApplicationContext ( ), "Bluetooth não foi ativado",
+							Toast.LENGTH_LONG ).show ( ); */
+					ShowMSG("Bluetooth não foi ativado");
 				}
 				break;
 		}
@@ -144,10 +152,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 							meuBluetoothAdapter.getRemoteDevice ( endereco_MAC_do_Bluetooth_remoto );
 				} else {
 					// exibe uma mensagem de erro
-					Toast.makeText (
+					/*Toast.makeText (
 							getApplicationContext ( ),
 							"Endereço MAC do dispositivo Bluetooth remoto não é válido",
-							Toast.LENGTH_SHORT ).show ( );
+							Toast.LENGTH_SHORT ).show ( ); */
+				ShowMSG("Endereço MAC do dispositivo Bluetooth remoto não é válido");
 				}
 				
 				try {
@@ -156,12 +165,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 							dispositivoBluetoothRemoto.createInsecureRfcommSocketToServiceRecord ( MEU_UUID );
 					bluetoothSocket.connect ( ); // estabelece a conexão
 					medicoesRecebidas.setText ( "" );
-					Toast.makeText ( getApplicationContext ( ),
-							"Conectado", Toast.LENGTH_SHORT ).show ( );
+				/*	Toast.makeText ( getApplicationContext ( ),
+							"Conectado", Toast.LENGTH_SHORT ).show ( ); */
+				ShowMSG ("Conectado"  );
 				} catch ( IOException e ) {
 					Log.e ( "ERRO AO CONECTAR", "O erro foi" + e.getMessage ( ) );
-					Toast.makeText ( getApplicationContext ( ),
-							"Conexão não foi estabelecida", Toast.LENGTH_SHORT ).show ( );
+					/*Toast.makeText ( getApplicationContext ( ),
+							"Conexão não foi estabelecida", Toast.LENGTH_SHORT ).show ( ); */
+					ShowMSG("Conexão não foi estabelecida");
 				}
 			} else {
 				medicoesRecebidas.setText ( "" );
@@ -171,25 +182,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 						bluetoothSocket.close ( ); // encerra a conexão
 						bluetoothSocket = null;
 						// exibe uma mensagem
-						Toast.makeText ( getApplicationContext ( ),
-								"Conexão encerrada", Toast.LENGTH_SHORT ).show ( );
+						/*Toast.makeText ( getApplicationContext ( ),
+								"Conexão encerrada", Toast.LENGTH_SHORT ).show ( ); */
+						
+						ShowMSG("Conexão encerrada");
 					} catch ( IOException e ) {
 						Log.e ( "ERRO AO DESCONECTAR", "O erro foi" + e.getMessage ( ) );
-						Toast.makeText (
+					/*	Toast.makeText (
 								getApplicationContext ( ),
 								"Erro - A conexão permanece estabelecida",
-								Toast.LENGTH_SHORT ).show ( );
+								Toast.LENGTH_SHORT ).show ( ); */
+						
+						ShowMSG ( "Erro - A conexão permanece estabelecida" );
 					}
 				} else {
-					Toast.makeText (
+					ShowMSG ( "Não há nenhuma conexão estabelecida a ser desconectada" );
+					/*Toast.makeText (
 							getApplicationContext ( ),
 							"Não há nenhuma conexão estabelecida a ser desconectada",
-							Toast.LENGTH_SHORT ).show ( );
+							Toast.LENGTH_SHORT ).show ( ); */
 				}
 			}
 		}
 		
-		/*else if ( view.getId ( ) == R.id.btnConfiguracao ) {
+		else if ( view.getId ( ) == R.id.btnConfig ) {
 			AlertDialog.Builder alert = new AlertDialog.Builder ( this );
 			alert.setTitle ( "Alterar MAC" );
 			alert.setMessage ( "\nInforme o endereço MAC desejado: " );
@@ -202,8 +218,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 				@Override
 				public void onClick ( DialogInterface dialog, int which ) {
 					
-					//endereco_MAC_do_Bluetooth_remoto = macAddress.getText ( ).toString ( );
-					
+					endereco_MAC_do_Bluetooth_remoto = macAddress.getText ( ).toString ( );
+					ShowMSG ( "MAC Address alterado com sucesso!" );
+					//Toast.makeText ( getApplicationContext ( ), "MAC Address alterado com sucesso!", Toast.LENGTH_LONG ).show ( );
+					conectar.setChecked ( false );
 				}
 			} );
 			
@@ -215,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			} );
 			AlertDialog dialog = alert.create ( );
 			dialog.show ( );
-		} */
+		}
 		
 		else if ( view.getId ( ) == R.id.btnMedirTemperatura ) {
 			// Verifica se há conexão estabelecida com o Bluetooth.
@@ -234,32 +252,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 					byte[] msgBuffer = new byte[ 1024 ];
 					inputStream.read ( msgBuffer );
 					// exibe o valor na caixa de texto
-					//Toast.makeText ( getApplicationContext ( ), msgBuffer.toString ( ), Toast.LENGTH_LONG ).show ( );
+					
 					
 					String result = new String ( msgBuffer );
 					
 					String result1 = result;
 					result1 += "\n" + result;
 					
-					Toast.makeText ( getApplicationContext ( ), result1, Toast.LENGTH_LONG ).show ( );
+					//Toast.makeText ( getApplicationContext ( ), result1, Toast.LENGTH_LONG ).show ( );
 					
 					medicoesRecebidas.setText ( result1 );
 					
 					
 				} catch ( IOException e ) {
 					Log.e ( "ERROR", "O erro foi" + e.getMessage ( ) );
-					Toast.makeText ( getApplicationContext ( ),
-							"Mensagem não recebida", Toast.LENGTH_LONG ).show ( );
+							ShowMSG("Mensagem não recebida");
+					/*Toast.makeText ( getApplicationContext ( ),
+							"Mensagem não recebida", Toast.LENGTH_LONG ).show ( ); */
 				}
 				
 			}
 		} else {
-			Toast.makeText ( getApplicationContext ( ),
-					"Bluetooth não está conectado", Toast.LENGTH_LONG ).show ( );
+			ShowMSG("Bluetooth não está conectado");
+			/*Toast.makeText ( getApplicationContext ( ),
+					"Bluetooth não está conectado", Toast.LENGTH_LONG ).show ( ); */
 		}
 		
 	}
+	
+	private void ShowMSG ( String msg) {
+		Snackbar.make ( linearLayout, msg, Snackbar.LENGTH_LONG ).show ( );
+	}
 }
 
-
-// fim da classe MainActivity
